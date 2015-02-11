@@ -40,9 +40,11 @@ def get_jenkins_job(job, build_number):
             )
         )
 
-    repo = parse_github_url(j[job][build_number]._data['actions'][3]['remoteUrls'][0])
-
-    changeset = j[job][build_number]._data['changeSet']['items']
+    try:
+        repo = parse_github_url(j[job][build_number]._data['actions'][3]['remoteUrls'][0])
+        changeset = j[job][build_number]._data['changeSet']['items']
+    except KeyError:
+        return {}
 
     commit_ids = []
     for ch in changeset:
@@ -68,10 +70,7 @@ def get_github_users(repo, commit_ids):
             'name': u.name
         })
 
-    if sys.version_info < (2,7):
-        dict((u['login'],u) for u in users).values()
-    else:
-        return {u['login']:u for u in users}.values()
+    return dict((u['login'],u) for u in users).values()
 
 class Slack:
     def __init__(self):
@@ -82,12 +81,14 @@ class Slack:
         response = self.conn.users.list()
         user_list = response.body['members']
 
+        xstr = lambda s: u'XXXXXXXXXXXXXXXXXXXXXXXXXX' if s is None else s
+
         matches = []
         for u in user_list:
             for gh_user in users:
-                if u['profile']['real_name_normalized'].lower() == unidecode(gh_user['name']).lower() or \
-                    u['profile']['email'].lower() == str(gh_user['email']).lower() or \
-                    u['name'].lower() == gh_user['login'].lower():
+                if u['profile']['real_name_normalized'].lower() == unidecode(xstr(gh_user['name'])).lower() or \
+                    u['profile']['email'].lower() == unidecode(xstr(gh_user['email'])) or \
+                    unidecode(u['name'].lower()) == unidecode(xstr(gh_user['login'])):
                     matches.append(u)
 
         return matches
@@ -110,6 +111,9 @@ def main():
     print '************************'
 
     changeset = get_jenkins_job(args.job, args.build)
+    if len(changeset) == 0:
+        print 'empty changeset'
+        sys.exit(0)
     print 'changeset: %s' % changeset
     gh_users = get_github_users(changeset['repo'], changeset['commit_ids'])
     print 'github users: %s' % gh_users
