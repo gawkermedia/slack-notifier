@@ -66,7 +66,10 @@ def get_github_users(repo, commit_ids):
             'name': u.name
         })
 
-    return {u['login']:u for u in users}.values()
+    if sys.version_info == (2,5):
+        dict((u['login'],u) for u in users).values()
+    else:
+        return {u['login']:u for u in users}.values()
 
 class Slack:
     def __init__(self):
@@ -99,6 +102,7 @@ def main():
     parser.add_argument('--job', help='Jenkins job', required=True)
     parser.add_argument('--build', help='build number', required=True, type=int)
     parser.add_argument('--msg', help='message to send', required=True)
+    parser.add_argument('--dry-run', help='dry run', dest='dryrun', action='store_false')
     args = parser.parse_args()
 
     print '************************'
@@ -117,7 +121,8 @@ def main():
         sys.exit(0)
 
     print 'slack matches: %s ' % slack_users
-    s.send_message(slack_users, args.msg)
+    if args.dryrun is False:
+        s.send_message(slack_users, args.msg)
 
     print '************************'
 
