@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 import sys
 import os
@@ -10,6 +11,7 @@ from github import Github
 import requests
 from jenkinsapi.jenkins import Jenkins
 from jenkinsapi.utils.requester import Requester
+from unidecode import unidecode
 
 requests.packages.urllib3.disable_warnings()
 
@@ -83,9 +85,9 @@ class Slack:
         matches = []
         for u in user_list:
             for gh_user in users:
-                if u['profile']['real_name_normalized'].lower() == str(gh_user['name']).lower() or \
+                if u['profile']['real_name_normalized'].lower() == unidecode(gh_user['name']).lower() or \
                     u['profile']['email'].lower() == str(gh_user['email']).lower() or \
-                    u['name'].lower() == str(gh_user['login']).lower():
+                    u['name'].lower() == gh_user['login'].lower():
                     matches.append(u)
 
         return matches
@@ -102,7 +104,7 @@ def main():
     parser.add_argument('--job', help='Jenkins job', required=True)
     parser.add_argument('--build', help='build number', required=True, type=int)
     parser.add_argument('--msg', help='message to send', required=True)
-    parser.add_argument('--dry-run', help='dry run', dest='dryrun', action='store_false')
+    parser.add_argument('--dry-run', help='dry run', dest='dryrun', action='store_true')
     args = parser.parse_args()
 
     print '************************'
