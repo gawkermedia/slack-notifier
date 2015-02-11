@@ -22,7 +22,7 @@ SLACK_TOKEN = os.environ['SLACK_TOKEN']
 
 
 def parse_github_url(url):
-    ''' git@github.com:gawkermedia/kinja-mantle.git '''
+    ''' git@github.com:user/repo.git '''
     GITURL_REGEX = '((git|ssh|http(s)?)|(git@[\w\.]+))(:(//)?)([\w\.@\:/\-~]+)(\.git)(/)?'
     return re.split(GITURL_REGEX, url)[7].split('/')
 
