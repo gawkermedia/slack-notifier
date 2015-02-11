@@ -1,6 +1,15 @@
 # slack-notifier
-jenkins+github+slack notifier
 
+
+
+## Install
+```
+virtualenv .venv
+source bin/activate
+pip install -r requirements.txt
+```
+
+## Usage
 ```
 $ export JENKINS_URL='http://jenkins.default.com/'
 $ export JENKINS_LOGIN='your_login'
