@@ -35,7 +35,6 @@ def get_jenkins_job(job, build_number):
         requester=Requester(
             JENKINS_LOGIN,
             JENKINS_PASS,
-            baseurl=JENKINS_URL,
             ssl_verify=False
             )
         )
