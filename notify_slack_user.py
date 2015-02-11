@@ -68,7 +68,7 @@ def get_github_users(repo, commit_ids):
             'name': u.name
         })
 
-    if sys.version_info == (2,5):
+    if sys.version_info < (2,7):
         dict((u['login'],u) for u in users).values()
     else:
         return {u['login']:u for u in users}.values()
