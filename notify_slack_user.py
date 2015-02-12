@@ -43,7 +43,7 @@ def get_jenkins_job(job, build_number):
         repo = parse_github_url(j[job][build_number]._data['actions'][3]['remoteUrls'][0])
         changeset = j[job][build_number]._data['changeSet']['items']
     except KeyError:
-        return {}
+        return None
 
     commit_ids = []
     for ch in changeset:
@@ -63,40 +63,53 @@ def get_github_users(repo, commit_ids):
 
     for sha in commit_ids:
         u = repo.get_commit(sha).author
-        users.append({
-            'login': u.login,
-            'email': u.email,
-            'name': u.name
-        })
+        out = {}
+        out['id'] = u.id
+        out['login'] = u.login
+        out['email'] = u.email
+        out['name'] = unidecode(unicode(u.name))
+
+        users.append(dict((k,str(v).lower()) for k,v in out.items() if v))
+
 
     return dict((u['login'],u) for u in users).values()
 
 class Slack:
     def __init__(self):
         self.conn = Slacker(SLACK_TOKEN)
+        self.users = self.get_users()
 
 
-    def get_users(self, users):
+    def get_users(self):
         response = self.conn.users.list()
         user_list = response.body['members']
 
-        xstr = lambda s: u'XXXXXXXXXXXXXXXXXXXXXXXXXX' if s is None else s
-
-        matches = []
+        users = []
         for u in user_list:
-            for gh_user in users:
-                if u['profile']['real_name_normalized'].lower() == unidecode(xstr(gh_user['name'])).lower() or \
-                    u['profile']['email'].lower() == unidecode(xstr(gh_user['email'])) or \
-                    unidecode(u['name'].lower()) == unidecode(xstr(gh_user['login'])):
-                    matches.append(u)
+            out = {}
+            out['id'] = u['id']
+            out['login'] = u['name']
+            out['email'] = u['profile']['email']
+            out['name'] = u['profile']['real_name_normalized']
+            users.append(dict((k,str(v).lower()) for k,v in out.items() if v))
 
-        return matches
+        return users
+
 
     def send_message(self, users, msg):
         for u in users:
             self.conn.chat.post_message(u['id'], msg)
             print 'message (%s) sent to: %s' % (msg, u['name'])
 
+    def search(self, gh_users):
+        matches = []
+        for u in self.users:
+            for uu in gh_users:
+                shared_items = set(u.items()) & set(uu.items())
+                if shared_items:
+                    matches.append(u)
+
+        return matches
 
 
 def main():
@@ -110,7 +123,7 @@ def main():
     print '************************'
 
     changeset = get_jenkins_job(args.job, args.build)
-    if len(changeset) == 0:
+    if changeset is None:
         print 'empty changeset'
         sys.exit(0)
     print 'changeset: %s' % changeset
@@ -119,15 +132,15 @@ def main():
 
     s = Slack()
 
-    slack_users = s.get_users(gh_users)
+    results = s.compare_users(gh_users, slack_users)
 
-    if len(slack_users) is 0:
+    if len(results) is 0:
         print '%s not found in slack' % gh_users
         sys.exit(0)
 
-    print 'slack matches: %s ' % slack_users
+    print 'slack matches: %s ' % [u['name'] for u in results]
     if args.dryrun is False:
-        s.send_message(slack_users, args.msg)
+        s.send_message(results, args.msg)
 
     print '************************'
 
