@@ -5,6 +5,16 @@ import notify_slack_user as n
 
 jenkins_testdata = [
     {
+        'name': 'empty changeset',
+        'job': 'kinja-core',
+        'build': 5921,
+        'commit_num': 0,
+        'author_num': 0
+        'authors': [],
+        'slack_users': [],
+        'expected_matches': 0
+    },
+    {
         'name': 'multiple sha one author',
         'job': 'kinja-mantle',
         'build': 14671,
@@ -54,23 +64,17 @@ jenkins_testdata = [
         'slack_users': ['eteleilles', 'kellymonson'],
         'expected_matches': 2
     },
-    # {
-    #     'name': 'empty changeset',
-    #     'job': 'kinja-core',
-    #     'build': 5921,
-    #     'commit_num': 0,
-    #     'author_num': 0
-    # },
 ]
 
 @pytest.mark.parametrize("input", jenkins_testdata)
 def test_responses(input):
     j = jenkins_result(input['job'], input['build'])
-    assert len(j['commit_ids']) == input['commit_num']
-
-    input['jenkins_response'] = j
-
-    github_reponse(input)
+    if input['commit_num'] == 0:
+        assert(j) == None
+    else:
+        assert len(j['commit_ids']) == input['commit_num']
+        input['jenkins_response'] = j
+        github_reponse(input)
 
 
 def github_reponse(input):
