@@ -51,8 +51,8 @@ jenkins_testdata = [
         'commit_num': 22,
         'author_num': 2,
         'authors': ['dataface', 'eteleilles'],
-        'slack_users': ['eteleilles'],
-        'expected_matches': 1
+        'slack_users': ['eteleilles', 'kellymonson'],
+        'expected_matches': 2
     },
     # {
     #     'name': 'empty changeset',

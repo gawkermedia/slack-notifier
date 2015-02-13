@@ -12,6 +12,7 @@ import requests
 from jenkinsapi.jenkins import Jenkins
 from jenkinsapi.utils.requester import Requester
 from unidecode import unidecode
+import logging
 
 requests.packages.urllib3.disable_warnings()
 
@@ -69,7 +70,7 @@ def get_github_users(repo, commit_ids):
         out['email'] = u.email
         out['name'] = unidecode(unicode(u.name))
 
-        users.append(dict((k,str(v).lower()) for k,v in out.items() if v))
+        users.append(dict((k,str(v).lower()) for k,v in out.items() if v and v is not None))
 
 
     return dict((u['login'],u) for u in users).values()
@@ -113,6 +114,7 @@ class Slack:
 
 
 def main():
+    logging.basicConfig(level=logging.INFO)
     parser = argparse.ArgumentParser(description='sexy')
     parser.add_argument('--job', help='Jenkins job', required=True)
     parser.add_argument('--build', help='build number', required=True, type=int)
@@ -120,29 +122,28 @@ def main():
     parser.add_argument('--dry-run', help='dry run', dest='dryrun', action='store_true')
     args = parser.parse_args()
 
-    print '************************'
+    logging.info('args %s' % args)
 
     changeset = get_jenkins_job(args.job, args.build)
     if changeset is None:
-        print 'empty changeset'
+        logging.info('empty changeset')
         sys.exit(0)
-    print 'changeset: %s' % changeset
+    logging.info('changeset: %s' % changeset)
     gh_users = get_github_users(changeset['repo'], changeset['commit_ids'])
-    print 'github users: %s' % gh_users
+    logging.info('github users: %s' % gh_users)
 
     s = Slack()
 
-    results = s.compare_users(gh_users, slack_users)
+    results = s.search(gh_users)
 
     if len(results) is 0:
-        print '%s not found in slack' % gh_users
+        logging.info('%s not found in slack' % gh_users)
         sys.exit(0)
 
-    print 'slack matches: %s ' % [u['name'] for u in results]
+    logging.info('slack matches: %s ' % [u['name'] for u in results])
     if args.dryrun is False:
         s.send_message(results, args.msg)
 
-    print '************************'
 
 
 
