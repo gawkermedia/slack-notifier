@@ -115,6 +115,7 @@ class Slack:
 
 def main():
     logging.basicConfig(level=logging.INFO)
+    logging.getLogger("requests").setLevel(logging.WARNING)
     parser = argparse.ArgumentParser(description='sexy')
     parser.add_argument('--job', help='Jenkins job', required=True)
     parser.add_argument('--build', help='build number', required=True, type=int)
