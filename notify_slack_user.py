@@ -114,7 +114,7 @@ class Slack:
 
 
 def main():
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.INFO,stream=sys.stdout)
     logging.getLogger("requests").setLevel(logging.WARNING)
     parser = argparse.ArgumentParser(description='sexy')
     parser.add_argument('--job', help='Jenkins job', required=True)
@@ -138,7 +138,7 @@ def main():
     results = s.search(gh_users)
 
     if len(results) is 0:
-        logging.info('%s not found in slack' % gh_users)
+        logging.info('no match: %s' % gh_users)
         sys.exit(0)
 
     logging.info('slack matches: %s ' % [u['name'] for u in results])
