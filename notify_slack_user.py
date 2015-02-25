@@ -88,10 +88,10 @@ class Slack:
         users = []
         for u in user_list:
             out = {}
-            out['id'] = u['id']
-            out['login'] = u['name']
-            out['email'] = u['profile']['email']
-            out['name'] = u['profile']['real_name_normalized']
+            out['id'] = u.get('id')
+            out['login'] = u.get('name')
+            out['email'] = u.get('profile').get('email')
+            out['name'] = u.get('profile').get('real_name_normalized')
             users.append(dict((k,str(v).lower()) for k,v in out.items() if v))
 
         return users
