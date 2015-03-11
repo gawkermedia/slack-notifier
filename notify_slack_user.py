@@ -3,7 +3,6 @@
 
 import sys
 import os
-import json
 import re
 import argparse
 from slacker import Slacker
@@ -28,6 +27,7 @@ def parse_github_url(url):
     ''' git@github.com:user/repo.git '''
     GITURL_REGEX = '((git|ssh|http(s)?)|(git@[\w\.]+))(:(//)?)([\w\.@\:/\-~]+)(\.git)(/)?'
     return re.split(GITURL_REGEX, url)[7].split('/')
+
 
 def get_jenkins_job(job, build_number):
     ''' returns dict with repo info and commit shas '''
@@ -55,6 +55,7 @@ def get_jenkins_job(job, build_number):
         'repo': repo
     }
 
+
 def get_github_users(repo, commit_ids):
     ''' get users from github for the give commit_ids in the repo '''
     g = Github(GITHUB_TOKEN)
@@ -70,16 +71,15 @@ def get_github_users(repo, commit_ids):
         out['email'] = u.email
         out['name'] = unidecode(unicode(u.name))
 
-        users.append(dict((k,str(v).lower()) for k,v in out.items() if v and v is not None))
+        users.append(dict((k, str(v).lower()) for k, v in out.items() if v and v is not None))
 
+    return dict((u['login'], u) for u in users).values()
 
-    return dict((u['login'],u) for u in users).values()
 
 class Slack:
     def __init__(self):
         self.conn = Slacker(SLACK_TOKEN)
         self.users = self.get_users()
-
 
     def get_users(self):
         response = self.conn.users.list()
@@ -92,10 +92,9 @@ class Slack:
             out['login'] = u.get('name')
             out['email'] = u.get('profile').get('email')
             out['name'] = u.get('profile').get('real_name_normalized')
-            users.append(dict((k,str(v).lower()) for k,v in out.items() if v))
+            users.append(dict((k, str(v).lower()) for k, v in out.items() if v))
 
         return users
-
 
     def send_message(self, users, msg):
         for u in users:
@@ -114,7 +113,7 @@ class Slack:
 
 
 def main():
-    logging.basicConfig(level=logging.INFO,stream=sys.stdout)
+    logging.basicConfig(level=logging.INFO, stream=sys.stdout)
     logging.getLogger("requests").setLevel(logging.WARNING)
     parser = argparse.ArgumentParser(description='sexy')
     parser.add_argument('--job', help='Jenkins job', required=True)
@@ -146,7 +145,5 @@ def main():
         s.send_message(results, args.msg)
 
 
-
-
 if __name__ == '__main__':
-  main()
+    main()

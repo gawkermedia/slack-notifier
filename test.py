@@ -66,11 +66,12 @@ jenkins_testdata = [
     },
 ]
 
+
 @pytest.mark.parametrize("input", jenkins_testdata)
 def test_responses(input):
     j = jenkins_result(input['job'], input['build'])
     if input['commit_num'] == 0:
-        assert(j) == None
+        assert(j) is None
     else:
         assert len(j['commit_ids']) == input['commit_num']
         input['jenkins_response'] = j
@@ -86,6 +87,7 @@ def github_reponse(input):
     input['gh_response'] = g
     slack_response(input)
 
+
 def slack_response(input):
     s = n.Slack()
     matches = s.search(input['gh_response'])
@@ -98,7 +100,6 @@ def slack_response(input):
 def jenkins_result(job, build):
     return n.get_jenkins_job(job, build)
 
+
 def test_parse_github_url():
     assert n.parse_github_url('git@github.com:user/repo.git') == ['user', 'repo']
-
-
