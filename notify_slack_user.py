@@ -66,7 +66,7 @@ def get_github_users(repo, commit_ids):
     for sha in commit_ids:
         u = repo.get_commit(sha).author
         out = {}
-        out['id'] = u.id
+        out['github_id'] = u.id
         out['login'] = u.login
         out['email'] = u.email
         out['name'] = unidecode(unicode(u.name))
@@ -88,7 +88,7 @@ class Slack:
         users = []
         for u in user_list:
             out = {}
-            out['id'] = u.get('id')
+            out['slack_id'] = u.get('id')
             out['login'] = u.get('name')
             out['email'] = u.get('profile').get('email')
             out['name'] = u.get('profile').get('real_name_normalized')
@@ -98,7 +98,7 @@ class Slack:
 
     def send_message(self, users, msg):
         for u in users:
-            self.conn.chat.post_message(u['id'], msg)
+            self.conn.chat.post_message(u['slack_id'].upper(), msg)
             print 'message (%s) sent to: %s' % (msg, u['name'])
 
     def search(self, gh_users):

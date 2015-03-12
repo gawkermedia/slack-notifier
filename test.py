@@ -9,7 +9,7 @@ jenkins_testdata = [
         'job': 'kinja-core',
         'build': 5921,
         'commit_num': 0,
-        'author_num': 0
+        'author_num': 0,
         'authors': [],
         'slack_users': [],
         'expected_matches': 0
