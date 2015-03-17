@@ -2,3 +2,4 @@ PyGithub
 slacker
 jenkinsapi
 unidecode
+pep8
