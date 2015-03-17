@@ -3,3 +3,4 @@ slacker
 jenkinsapi
 unidecode
 pep8
+pytest
