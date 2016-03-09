@@ -42,6 +42,13 @@ def get_jenkins_job(job, build_number):
 
     try:
         repo = parse_github_url(j[job][build_number]._data['actions'][3]['remoteUrls'][0])
+    except KeyError:
+        repo = ""
+
+    try:
+        if repo == "":
+            repo = parse_github_url(j[job][build_number]._data['actions'][4]['remoteUrls'][0])
+
         changeset = j[job][build_number]._data['changeSet']['items']
     except KeyError:
         return None
