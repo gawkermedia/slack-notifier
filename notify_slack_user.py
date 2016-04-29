@@ -76,7 +76,7 @@ def get_github_users(repo, commit_ids):
         out['github_id'] = u.id
         out['login'] = u.login
         out['email'] = u.email
-        out['name'] = unidecode(unicode(u.get('profile').get('real_name_normalized')))
+        out['name'] = unidecode(unicode(u.name)) 
         users.append(dict((k, str(v).lower()) for k, v in out.items() if v and v is not None))
 
     return dict((u['login'], u) for u in users).values()
