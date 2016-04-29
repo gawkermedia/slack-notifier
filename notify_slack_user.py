@@ -97,7 +97,7 @@ class Slack:
             out['slack_id'] = u.get('id')
             out['login'] = unidecode(unicode(u.get('name')))
             out['email'] = u.get('profile').get('email')
-            out['name'] = unidecode(unicode(u.get('profile').get('real_name_normalized'))))
+            out['name'] = unidecode(unicode(u.get('profile').get('real_name_normalized')))
             users.append(dict((k, str(v).lower()) for k, v in out.items() if v))
 
         return users
